@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-extension MainViewController {
+extension UIViewController {
     
     func alertErrorController(title: String, message: String) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)

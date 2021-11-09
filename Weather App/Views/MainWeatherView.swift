@@ -90,15 +90,15 @@ class MainWeatherView: UIView {
     
             cityLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             cityLabel.topAnchor.constraint(equalTo: imageWeather.bottomAnchor, constant: 8),
-            cityLabel.heightAnchor.constraint(equalToConstant: frame.height/14),
-            cityLabel.widthAnchor.constraint(equalToConstant: frame.width/2),
+            cityLabel.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/14),
+            cityLabel.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 2/3),
             
             descriptionWeatherLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             descriptionWeatherLabel.topAnchor.constraint(equalTo: cityLabel.bottomAnchor, constant: 8),
             
             temperatureLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             temperatureLabel.topAnchor.constraint(equalTo: descriptionWeatherLabel.bottomAnchor, constant: 8),
-            temperatureLabel.heightAnchor.constraint(equalToConstant: frame.height/7),
+            temperatureLabel.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/7),
 
             stackConditionsWeatherView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -200),
             stackConditionsWeatherView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
