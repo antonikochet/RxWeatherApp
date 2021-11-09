@@ -38,6 +38,11 @@ class MainWeatherView: UIView {
         return label
     }()
     
+    lazy var feelsLikeTemperatureLabel: UILabel = {
+        let label = UILabel.createLabel(title: "Ощущается как 10", textStyle: .body)
+        return label
+    }()
+    
     lazy var stackConditionsWeatherView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
             ConditionsWeatherView(frame: .zero, type: .highLow(12, 8)),
@@ -64,6 +69,7 @@ class MainWeatherView: UIView {
         cityLabel.text = weather.city
         imageWeather.image = UIImage(systemName: weather.statusWeaher.imageName)
         temperatureLabel.text = String(weather.temperature)
+        feelsLikeTemperatureLabel.text = "Ощущается как \(weather.feelsLikeTemperature)"
         
         let highLow: ConditionsWeatherView? = stackConditionsWeatherView.arrangedSubviews[0] as? ConditionsWeatherView
         highLow?.setTypeConditionsWeather(.highLow(weather.highTemperature, weather.lowTemperature))
@@ -78,6 +84,7 @@ class MainWeatherView: UIView {
         addSubview(cityLabel)
         addSubview(descriptionWeatherLabel)
         addSubview(temperatureLabel)
+        addSubview(feelsLikeTemperatureLabel)
         addSubview(stackConditionsWeatherView)
     }
     
@@ -100,6 +107,9 @@ class MainWeatherView: UIView {
             temperatureLabel.topAnchor.constraint(equalTo: descriptionWeatherLabel.bottomAnchor, constant: 8),
             temperatureLabel.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/7),
 
+            feelsLikeTemperatureLabel.topAnchor.constraint(equalTo: temperatureLabel.bottomAnchor, constant: 8),
+            feelsLikeTemperatureLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            
             stackConditionsWeatherView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -200),
             stackConditionsWeatherView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             stackConditionsWeatherView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),

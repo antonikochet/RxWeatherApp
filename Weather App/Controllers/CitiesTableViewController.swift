@@ -98,6 +98,14 @@ extension CitiesTableViewController: UITableViewDataSource {
         }
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath){
+        if editingStyle == .delete {
+            let cell = tableView.cellForRow(at: indexPath)
+            delegate?.removeCity(name:cell?.textLabel?.text ?? "")
+            tableView.deleteRows(at: [indexPath], with: .left)
+        }
+    }
 }
 
 extension CitiesTableViewController: UITableViewDelegate {

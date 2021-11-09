@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum StatusWeather: Int {
+enum StatusWeather: Int, Codable {
     case thunderstorm
     case thunderstormWithRain
     case drizzle

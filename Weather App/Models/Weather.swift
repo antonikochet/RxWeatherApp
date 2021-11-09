@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ViewWeather {
+struct ViewWeather: Codable {
     let temperature: Int
     let feelsLikeTemperature: Int
     let statusWeaher: StatusWeather
