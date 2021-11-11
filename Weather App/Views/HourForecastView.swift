@@ -1,15 +1,20 @@
 //
-//  ConditionsWeatherView.swift
+//  HourForecastView.swift
 //  Weather App
 //
-//  Created by Антон Кочетков on 02.11.2021.
+//  Created by Антон Кочетков on 10.11.2021.
 //
 
 import UIKit
 
-class ConditionsWeatherView: UIView {
+class HourForecastView: UIView {
 
-    private var typeConditionsWeather: ConditionsWeather?
+    lazy var temperatureLabel: UILabel = {
+        let label = UILabel.createLabel(title: "?", textStyle: .body)
+        label.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        label.adjustsFontSizeToFitWidth = true
+        return label
+    }()
     
     lazy var imageView: UIImageView = {
         let image = UIImage(systemName: "questionmark")
@@ -21,14 +26,7 @@ class ConditionsWeatherView: UIView {
         return imageView
     }()
     
-    lazy var nameLabel: UILabel = {
-        let label = UILabel.createLabel(title: "?" , textStyle: .body)
-        label.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
-        label.adjustsFontSizeToFitWidth = true
-        return label
-    }()
-    
-    lazy var dataLabel: UILabel = {
+    lazy var timeLabel: UILabel = {
         let label = UILabel.createLabel(title: "?", textStyle: .body)
         label.font = UIFont.systemFont(ofSize: 12, weight: .light)
         label.adjustsFontSizeToFitWidth = true
@@ -37,11 +35,11 @@ class ConditionsWeatherView: UIView {
     
     lazy var stackView: UIStackView = {
         let stackView = UIStackView()
+        stackView.addArrangedSubview(temperatureLabel)
         stackView.addArrangedSubview(imageView)
-        stackView.addArrangedSubview(nameLabel)
-        stackView.addArrangedSubview(dataLabel)
+        stackView.addArrangedSubview(timeLabel)
         stackView.axis = .vertical
-        stackView.distribution = .fillEqually
+        stackView.distribution = .fillProportionally
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -65,12 +63,15 @@ class ConditionsWeatherView: UIView {
         super.updateConstraints()
     }
     
-    func setTypeConditionsWeather(_ newValue: ConditionsWeather) {
-        typeConditionsWeather = newValue
-        let image = UIImage(systemName: newValue.imageName)
+    func updateView(forecast: ForecastWeather) {
+        temperatureLabel.text = String(forecast.temperature)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        timeLabel.text = dateFormatter.string(from: forecast.time)
+        
+        let image = UIImage(systemName: forecast.statusWeather.imageName)
         image?.withRenderingMode(.alwaysOriginal)
         imageView.image = image
-        nameLabel.text = newValue.nameLabel
-        dataLabel.text = newValue.stringDataView
     }
 }

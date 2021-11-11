@@ -9,7 +9,7 @@ import UIKit
 
 class CitiesTableViewController: UIViewController {
 
-    weak var delegate: UpdateCitiesDelegate?
+    weak var delegate: TableOfCityDelegate?
     
     lazy var cityTextField: UITextField = {
         let textField = UITextField()

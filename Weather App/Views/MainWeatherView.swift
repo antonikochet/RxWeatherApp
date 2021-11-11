@@ -22,7 +22,7 @@ class MainWeatherView: UIView {
     }()
     
     lazy var imageWeather: UIImageView = {
-        let image = UIImage(systemName: "cloud.rain")
+        let image = UIImage(systemName: "questionmark")
         image?.withRenderingMode(.alwaysOriginal)
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
@@ -32,22 +32,27 @@ class MainWeatherView: UIView {
     }()
     
     lazy var temperatureLabel: UILabel = {
-        let label = UILabel.createLabel(title: "10", textStyle: .largeTitle)
+        let label = UILabel.createLabel(title: "?", textStyle: .largeTitle)
         label.font = UIFont.systemFont(ofSize: 150, weight: .ultraLight)
         label.adjustsFontSizeToFitWidth = true
         return label
     }()
     
     lazy var feelsLikeTemperatureLabel: UILabel = {
-        let label = UILabel.createLabel(title: "Ощущается как 10", textStyle: .body)
+        let label = UILabel.createLabel(title: "Ощущается как ?", textStyle: .body)
         return label
     }()
     
     lazy var stackConditionsWeatherView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [
-            ConditionsWeatherView(frame: .zero, type: .highLow(12, 8)),
-            ConditionsWeatherView(frame: .zero, type: .wind(1.5)),
-            ConditionsWeatherView(frame: .zero, type: .humidity(80))])
+        let stackView = UIStackView(arrangedSubviews: Array(repeating: ConditionsWeatherView.init, count: 3))
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    lazy var stackHourForestView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: Array(repeating: HourForecastView.init, count: 6))
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -78,6 +83,14 @@ class MainWeatherView: UIView {
         let humidity: ConditionsWeatherView? = stackConditionsWeatherView.arrangedSubviews[2] as? ConditionsWeatherView
         humidity?.setTypeConditionsWeather(.humidity(weather.humidity))
         
+        if weather.arrayForecast.count >= stackHourForestView.arrangedSubviews.count {
+            for (index, view) in stackHourForestView.arrangedSubviews.enumerated() {
+                let forecast = weather.arrayForecast[index]
+                let hourForecastView = view as! HourForecastView
+                hourForecastView.updateView(forecast: forecast)
+            }
+        }
+        
     }
     private func addSubviews() {
         addSubview(imageWeather)
@@ -86,6 +99,7 @@ class MainWeatherView: UIView {
         addSubview(temperatureLabel)
         addSubview(feelsLikeTemperatureLabel)
         addSubview(stackConditionsWeatherView)
+        addSubview(stackHourForestView)
     }
     
     override func updateConstraints() {
@@ -110,11 +124,15 @@ class MainWeatherView: UIView {
             feelsLikeTemperatureLabel.topAnchor.constraint(equalTo: temperatureLabel.bottomAnchor, constant: 8),
             feelsLikeTemperatureLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             
-            stackConditionsWeatherView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -200),
+            stackConditionsWeatherView.bottomAnchor.constraint(equalTo: stackHourForestView.topAnchor, constant: -64),
             stackConditionsWeatherView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             stackConditionsWeatherView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            stackConditionsWeatherView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/10)
+            stackConditionsWeatherView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/10),
             
+            stackHourForestView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -64),
+            stackHourForestView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            stackHourForestView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            stackHourForestView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/10)
         ])
     
         super.updateConstraints()
@@ -133,4 +151,13 @@ extension UILabel {
         return label
     }
 
+}
+
+extension Array {
+    init(repeating: (() -> Element), count: Int) {
+        self = []
+        for _ in 0..<count {
+            self.append(repeating())
+        }
+    }
 }

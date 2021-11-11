@@ -10,4 +10,8 @@ import Foundation
 struct ErrorServer: Codable {
     let cod: String
     let message: String
+    
+    var description: String {
+        return "Ошибка \(cod) - \(message)"
+    }
 }
