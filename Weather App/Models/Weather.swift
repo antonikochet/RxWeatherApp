@@ -12,7 +12,7 @@ struct ViewWeather: Codable {
     let feelsLikeTemperature: Int
     let statusWeaher: StatusWeather
     let idCity: Int
-    let city: String
+    var city: String
     let dateUpdate: Date
     let weatherDesctiption: String
     let highTemperature: Int
@@ -34,11 +34,12 @@ struct ViewWeather: Codable {
         lowTemperature = curract.main.tempMin.toInt()
         windSpeed = curract.wind.speed
         humidity = curract.main.humidity
-        arrayForecast = forecast.list.map { forecast in
-            let statusId = forecast.weather.first?.id ?? 0
-            let forecastWeather = ForecastWeather(time: Date(timeIntervalSince1970: TimeInterval(forecast.dt)),
+        arrayForecast = forecast.list.map { forecastList in
+            let statusId = forecastList.weather.first?.id ?? 0
+            let forecastWeather = ForecastWeather(time: Date(timeIntervalSince1970: TimeInterval(forecastList.dt)),
+                                                  timeZone: forecast.city.timezone,
                                                   statusWeather: StatusWeather(rawValue: statusId) ?? StatusWeather.none,
-                                                  temperature: forecast.main.temp.toInt())
+                                                  temperature: forecastList.main.temp.toInt())
             return forecastWeather
         }
     }
@@ -46,6 +47,7 @@ struct ViewWeather: Codable {
 
 struct ForecastWeather: Codable {
     let time: Date
+    let timeZone: Int
     let statusWeather: StatusWeather
     let temperature: Int
 }

@@ -60,7 +60,6 @@ enum StatusWeather: Int, Codable {
                 let date = Date.now
                 let calendar = Calendar.current
                 let hour  = calendar.component(.hour, from: date)
-                print(hour)
                 if hour > 19 {
                     return "sparkles"
                 } else {

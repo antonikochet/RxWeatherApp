@@ -64,9 +64,10 @@ class HourForecastView: UIView {
     }
     
     func updateView(forecast: ForecastWeather) {
-        temperatureLabel.text = String(forecast.temperature)
+        temperatureLabel.text = forecast.temperature.tempString
         
         let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: forecast.timeZone)
         dateFormatter.dateFormat = "HH:mm"
         timeLabel.text = dateFormatter.string(from: forecast.time)
         

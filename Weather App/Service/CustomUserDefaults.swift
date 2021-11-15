@@ -30,10 +30,21 @@ class CustomUserDefaults {
         }
     }
 
+    static var locationData: ViewWeather? {
+        get {
+            guard let data = UserDefaults.standard.value(forKey: NameOfValue.locationData.rawValue) as? Data else { return nil}
+            return try? PropertyListDecoder().decode(ViewWeather.self, from: data)
+        }
+        set {
+            let encodeData = try? PropertyListEncoder().encode(newValue)
+            UserDefaults.standard.set(encodeData, forKey: NameOfValue.locationData.rawValue)
+        }
+    }
     
     enum NameOfValue: String {
         case arrayOfCities
         case firstDataCity
+        case locationData
     }
 
 }

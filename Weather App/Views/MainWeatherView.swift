@@ -73,8 +73,8 @@ class MainWeatherView: UIView {
         descriptionWeatherLabel.text = weather.weatherDesctiption
         cityLabel.text = weather.city
         imageWeather.image = UIImage(systemName: weather.statusWeaher.imageName)
-        temperatureLabel.text = String(weather.temperature)
-        feelsLikeTemperatureLabel.text = "Ощущается как \(weather.feelsLikeTemperature)"
+        temperatureLabel.text = weather.temperature.tempString
+        feelsLikeTemperatureLabel.text = "Ощущается как \(weather.feelsLikeTemperature.tempString)"
         
         let highLow: ConditionsWeatherView? = stackConditionsWeatherView.arrangedSubviews[0] as? ConditionsWeatherView
         highLow?.setTypeConditionsWeather(.highLow(weather.highTemperature, weather.lowTemperature))
@@ -159,5 +159,16 @@ extension Array {
         for _ in 0..<count {
             self.append(repeating())
         }
+    }
+}
+
+extension Int {
+    var tempString: String {
+        if self > 0 {
+            return "+\(self)°"
+        } else {
+            return "\(self)°"
+        }
+       
     }
 }

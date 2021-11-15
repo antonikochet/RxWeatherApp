@@ -7,6 +7,14 @@
 
 import UIKit
 
+protocol TableOfCityDelegate: NSObject {
+    func addNewCity(name: String)
+    func selectCity(name: String)
+    func removeCity(name: String)
+    var arrayWeather: [ViewWeather] { get }
+    var viewWeatherLocation: ViewWeather? { get }
+}
+
 class CitiesTableViewController: UIViewController {
 
     weak var delegate: TableOfCityDelegate?
@@ -35,7 +43,8 @@ class CitiesTableViewController: UIViewController {
     
     lazy var tableView: UITableView = {
         let table = UITableView()
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        table.register(CityTableViewCell.self, forCellReuseIdentifier: CityTableViewCell.Identifier)
+        table.rowHeight = 80
         table.dataSource = self
         table.delegate = self
         table.translatesAutoresizingMaskIntoConstraints = false
@@ -71,7 +80,7 @@ class CitiesTableViewController: UIViewController {
     @objc private func actionSearchCity() {
         guard let textField = cityTextField.text?.trimmingCharacters(in: .whitespaces) else { return }
         guard textField.count != 0 else { return }
-        if arrayCities.contains(where: { $0 == textField }) {
+        if arrayWeather.contains(where: { $0.city == textField }) {
             alertErrorController(title: "Предупреждение", message: "Город '\(textField)' уже есть в списке")
         } else {
             delegate?.addNewCity(name: textField)
@@ -83,35 +92,89 @@ class CitiesTableViewController: UIViewController {
 
 extension CitiesTableViewController: UITableViewDataSource {
     
-    private var arrayCities: [String] {
-        return delegate?.arrayCities ?? []
+    private var arrayWeather: [ViewWeather] {
+        return delegate?.arrayWeather ?? []
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return arrayCities.count
+        switch section {
+            case 0:
+                if delegate?.viewWeatherLocation != nil {
+                    return 1
+                } else {
+                    return 0
+                }
+            case 1:
+                return arrayWeather.count
+            default:
+                return 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        if let nameCity = arrayCities.get(index: indexPath.row) {
-            cell.textLabel?.text = nameCity
+        let cell = tableView.dequeueReusableCell(withIdentifier: CityTableViewCell.Identifier, for: indexPath) as! CityTableViewCell
+        switch indexPath.section {
+            case 0:
+                if let weatherCity = delegate?.viewWeatherLocation {
+                    cell.set(weatherCity: weatherCity)
+                }
+            case 1:
+                if let weatherCity = arrayWeather.get(index: indexPath.row) {
+                    cell.set(weatherCity: weatherCity)
+                }
+            default:
+                break
         }
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath){
-        if editingStyle == .delete {
-            let cell = tableView.cellForRow(at: indexPath)
-            delegate?.removeCity(name:cell?.textLabel?.text ?? "")
+        if editingStyle == .delete && indexPath.section == 1 {
+            let cell = tableView.cellForRow(at: indexPath) as! CityTableViewCell
+            delegate?.removeCity(name:cell.nameCity.text ?? "")
             tableView.deleteRows(at: [indexPath], with: .left)
         }
     }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+
 }
 
 extension CitiesTableViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate?.selectCity(name: arrayCities[indexPath.row])
-        navigationController?.popViewController(animated: true)
+        switch indexPath.section {
+            case 0:
+                if let name = delegate?.viewWeatherLocation?.city {
+                    delegate?.selectCity(name: name)
+                }
+                navigationController?.popViewController(animated: true)
+            case 1:
+                delegate?.selectCity(name: arrayWeather[indexPath.row].city)
+                navigationController?.popViewController(animated: true)
+            default:
+                break
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let label = UILabel()
+        label.adjustsFontSizeToFitWidth = true
+        label.backgroundColor = .lightGray
+        switch section {
+            case 0:
+                label.text = "Местоположение"
+            case 1:
+                label.text = "Города"
+            default:
+                break
+        }
+        return label
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40
     }
 }
 

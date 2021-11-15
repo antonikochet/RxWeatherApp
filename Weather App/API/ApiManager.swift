@@ -13,6 +13,8 @@ typealias GetWeather = (Currect?, Forecast?, ErrorServer?) -> Void
 
 class ApiManager {
     
+    static let shared = ApiManager()
+    
     private var lang: Lang
     private var units: Units
     private let apiKey = "4d5555216cc6eafafdb25aeee2050261"
@@ -29,11 +31,6 @@ class ApiManager {
     init() {
         self.lang = Lang.ru
         self.units = Units.metric
-    }
-    
-    init(lang: Lang, units: Units) {
-        self.lang = lang
-        self.units = units
     }
     
     func getWeather(for typeGetting: TypeGettingCurrectWeather, countTimestamps: Int, completion: @escaping GetWeather) {

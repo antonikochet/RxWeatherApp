@@ -15,7 +15,7 @@ enum AnswerServer {
 enum TypeGettingCurrectWeather {
     case city(String)
     case id(Int)
-    case location(Double, Double)
+    case location(lat: Double,lon: Double)
     
     func generateURLQueryItem() -> [URLQueryItem] {
         switch self {

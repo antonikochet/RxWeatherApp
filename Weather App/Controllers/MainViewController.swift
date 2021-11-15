@@ -5,23 +5,15 @@
 //  Created by Антон Кочетков on 31.10.2021.
 //
 //TODO: 1) вынести работу с сетью и данными в отдельный класс
-//TODO: 2) сделать определение по местоположению
-//TODO: 3) сделать кастомную ячейку для городов
-//TODO: 4) исправить ошибку при начальной загрузки у 3 часового нет изображения
+//TODO: 2) исправить ошибку при начальной загрузки у 3 часового нет изображения
 
 import UIKit
-
-protocol TableOfCityDelegate: NSObject {
-    func addNewCity(name: String)
-    func selectCity(name: String)
-    func removeCity(name: String)
-    var arrayCities: [String] { get }
-}
 
 class MainViewController: UIViewController {
 
     private var currectCity: String?
     private var dictionaryOfCityWeather: [String: ViewWeather] = [:]
+    private let location = "Текущие местоположение"
     
     lazy var weatherView = {
         return MainWeatherView(frame: view.frame)
@@ -32,14 +24,21 @@ class MainViewController: UIViewController {
         updateBackgroundView()
         view.addSubview(weatherView)
         setupBarButtoItem()
-        if let viewWeather = CustomUserDefaults.firstDataCity {
+        if LocationManager.shared.isAuthorization,
+           let viewWeather = CustomUserDefaults.locationData {
+            dictionaryOfCityWeather[location] = viewWeather
+            currectCity = location
+            DispatchQueue.main.async {
+                self.weatherView.updateView(viewWeather)
+            }
+        } else if let viewWeather = CustomUserDefaults.firstDataCity {
             dictionaryOfCityWeather[viewWeather.city] = viewWeather
             currectCity = viewWeather.city
             DispatchQueue.main.async {
                 self.weatherView.updateView(viewWeather)
             }
         }
-        
+        getLocation()
         updateAllCityWeather()
     }
     
@@ -47,16 +46,22 @@ class MainViewController: UIViewController {
         super.viewWillDisappear(animated)
         CustomUserDefaults.arrayOfCities = Array(dictionaryOfCityWeather.keys)
         CustomUserDefaults.firstDataCity = dictionaryOfCityWeather[currectCity ?? ""]
+        if LocationManager.shared.isAuthorization,
+           let viewWeather = dictionaryOfCityWeather[location] {
+            CustomUserDefaults.locationData = viewWeather
+        } else {
+            CustomUserDefaults.locationData = nil
+        }
     }
     
     private func getWeather() {
-        let api = ApiManager()
-        guard let nameCity = currectCity else {
-            alertErrorController(title: "Ошибка", message: "Город не выбран")
+        guard let city = currectCity else {
+            alertErrorController(title: "Ошибка", message: "Город не найден")
             return
         }
-        let typeGetting = TypeGettingCurrectWeather.city(nameCity)
-        api.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
+        guard city != location else { return }
+        
+        ApiManager.shared.getWeather(for: TypeGettingCurrectWeather.city(city), countTimestamps: 7) { [weak self] currect, forecast, error in
             guard error == nil else {
                 self?.alertErrorController(title: "Ошибка", message: error!.description)
                 return
@@ -64,19 +69,44 @@ class MainViewController: UIViewController {
             if currect != nil,
                forecast != nil {
                 let viewWeather = ViewWeather(currect!, forecast!)
-                self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: nameCity)
+                self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: viewWeather.city)
                 self?.weatherView.updateView(viewWeather)
+            }
+        }
+    }
+    
+    private func getLocation() {
+        LocationManager.shared.getLocation { location in
+            let lon = location.coordinate.longitude
+            let lat = location.coordinate.latitude
+            let typeGetting = TypeGettingCurrectWeather.location(lat: lat, lon: lon)
+            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
+                guard let strongSelf = self else { return }
+                guard error == nil else {
+                    strongSelf.alertErrorController(title: "Ошибка", message: "Погода не найдена по местоположению")
+                    return
+                }
+                if currect != nil,
+                   forecast != nil {
+                    var viewWeather = ViewWeather(currect!, forecast!)
+                    viewWeather.city = strongSelf.location
+                    strongSelf.dictionaryOfCityWeather.updateValue(viewWeather, forKey: strongSelf.location )
+                    strongSelf.weatherView.updateView(viewWeather)
+                    strongSelf.currectCity = strongSelf.location
+                }
             }
         }
     }
     
     private func updateAllCityWeather() {
         let arrayCity = CustomUserDefaults.arrayOfCities
-        let api = ApiManager()
         var errorServer: ErrorServer?
         for nameCity in arrayCity {
+            if nameCity == location {
+                continue
+            }
             let typeGetting = TypeGettingCurrectWeather.city(nameCity)
-            api.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
+            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
                 guard error == nil else {
                     errorServer = error
                     return
@@ -93,7 +123,12 @@ class MainViewController: UIViewController {
     }
     
     @objc private func updateDataForThisCity() {
-        getWeather()
+        if currectCity == location {
+            getLocation()
+        } else {
+            getWeather()
+        }
+        
     }
     
     @objc private func showViewTableCity() {
@@ -136,9 +171,11 @@ class MainViewController: UIViewController {
 
 extension MainViewController: TableOfCityDelegate{
     
-    var arrayCities: [String] {
-        return Array(dictionaryOfCityWeather.keys)
+    var arrayWeather: [ViewWeather] {
+        let arrayWeather = Array(dictionaryOfCityWeather.values)
+        return arrayWeather.filter { $0.city != location }
     }
+    
     func addNewCity(name: String) {
         currectCity = name
         getWeather()
@@ -163,4 +200,9 @@ extension MainViewController: TableOfCityDelegate{
         }
     }
     
+    var viewWeatherLocation: ViewWeather? {
+        return dictionaryOfCityWeather[location]
+    }
+    
 }
+

@@ -38,7 +38,7 @@ enum ConditionsWeather {
     var stringDataView: String {
         switch self {
             case .highLow(let high, let low):
-                return "\(high)/\(low)"
+                return "\(high.tempString)/\(low.tempString)"
             case .wind(let speed):
                 return "\(speed) m/s"
             case .humidity(let hum):
