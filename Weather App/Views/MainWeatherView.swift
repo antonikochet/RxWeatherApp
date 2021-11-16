@@ -59,6 +59,15 @@ class MainWeatherView: UIView {
         return stackView
     }()
     
+    lazy var backgroundView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.center = center
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubviews()
@@ -83,6 +92,8 @@ class MainWeatherView: UIView {
         let humidity: ConditionsWeatherView? = stackConditionsWeatherView.arrangedSubviews[2] as? ConditionsWeatherView
         humidity?.setTypeConditionsWeather(.humidity(weather.humidity))
         
+        updateBackgroundView(sunrize: weather.sunrise, sunset: weather.sunset)
+        
         if weather.arrayForecast.count >= stackHourForestView.arrangedSubviews.count {
             for (index, view) in stackHourForestView.arrangedSubviews.enumerated() {
                 let forecast = weather.arrayForecast[index]
@@ -100,6 +111,8 @@ class MainWeatherView: UIView {
         addSubview(feelsLikeTemperatureLabel)
         addSubview(stackConditionsWeatherView)
         addSubview(stackHourForestView)
+        addSubview(backgroundView)
+        sendSubviewToBack(backgroundView)
     }
     
     override func updateConstraints() {
@@ -132,10 +145,26 @@ class MainWeatherView: UIView {
             stackHourForestView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -64),
             stackHourForestView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             stackHourForestView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            stackHourForestView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/10)
+            stackHourForestView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1/10),
+            
+            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            backgroundView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     
         super.updateConstraints()
+    }
+    
+    private func updateBackgroundView(sunrize: Date, sunset: Date){
+        var backgroundImage: UIImage?
+        let now = Date()
+        if now > sunrize && now < sunset {
+            backgroundImage = UIImage(named: "sunset")
+        } else {
+            backgroundImage = UIImage(named: "night")
+        }
+        backgroundView.image = backgroundImage
     }
 }
 

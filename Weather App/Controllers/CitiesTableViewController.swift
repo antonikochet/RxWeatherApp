@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol TableOfCityDelegate: NSObject {
+protocol TableOfCityDelegate: AnyObject {
     func addNewCity(name: String)
     func selectCity(name: String)
     func removeCity(name: String)

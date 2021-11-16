@@ -19,6 +19,8 @@ struct ViewWeather: Codable {
     let lowTemperature: Int
     let windSpeed: Double
     let humidity: Int
+    let sunrise: Date
+    let sunset: Date
     var arrayForecast: [ForecastWeather] = []
     
     init(_ curract: Currect, _ forecast: Forecast) {
@@ -34,6 +36,8 @@ struct ViewWeather: Codable {
         lowTemperature = curract.main.tempMin.toInt()
         windSpeed = curract.wind.speed
         humidity = curract.main.humidity
+        sunrise = Date(timeIntervalSince1970: TimeInterval(curract.sys.sunrise))
+        sunset = Date(timeIntervalSince1970: TimeInterval(curract.sys.sunset))
         arrayForecast = forecast.list.map { forecastList in
             let statusId = forecastList.weather.first?.id ?? 0
             let forecastWeather = ForecastWeather(time: Date(timeIntervalSince1970: TimeInterval(forecastList.dt)),
