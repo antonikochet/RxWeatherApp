@@ -158,6 +158,14 @@ extension CitiesTableViewController: UITableViewDelegate {
         }
     }
     
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        if indexPath.section == 0 {
+            return .none
+        } else {
+            return .delete
+        }
+    }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let label = UILabel()
         label.adjustsFontSizeToFitWidth = true
