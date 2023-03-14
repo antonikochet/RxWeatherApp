@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import RxSwift
 
 typealias currectWeather = (AnswerServer) -> Void
 
@@ -116,4 +117,32 @@ class ApiManager {
         task.resume()
         
     }
+}
+
+// MARK: - Rx
+extension ApiManager {
+    func getCurrectWeather(_ typeGetting: TypeGettingCurrectWeather) -> Observable<Currect> {
+        guard let url = URLComponemtsCurrect(typeGetting).url else { return Observable.error(ApiError.invalidURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.GET.rawValue
+        
+        return session.rx.data(request: request).map(Currect.self)
+    }
+    
+    func getForecastWeather(_ typeGetting: TypeGettingCurrectWeather, countTimestamps: Int) -> Observable<Forecast> {
+        guard let url = URLComponemtsForecast(typeGetting, countTimestamps: countTimestamps).url else { return Observable.error(ApiError.invalidURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.GET.rawValue
+        
+        return session.rx.data(request: request).map(Forecast.self)
+    }
+}
+
+public extension ObservableType where Element == Data {
+  func map<T>(_ type: T.Type, using decoder: JSONDecoder? = nil) -> Observable<T> where T: Decodable {
+    return self.map { data -> T in
+      let decoder = decoder ?? JSONDecoder()
+      return try decoder.decode(type, from: data)
+    }
+  }
 }

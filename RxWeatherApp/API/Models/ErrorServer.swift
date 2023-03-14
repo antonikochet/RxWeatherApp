@@ -15,3 +15,8 @@ struct ErrorServer: Codable {
         return "Ошибка \(cod) - \(message)"
     }
 }
+
+enum ApiError: Error {
+    case invalidURL
+    case invalidData
+}
