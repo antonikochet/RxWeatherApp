@@ -7,6 +7,22 @@
 
 import Foundation
 
+struct WeatherApi {
+    static let apiKey = "4d5555216cc6eafafdb25aeee2050261"
+    static let baseUrlComponents: URLComponents = {
+        var url = URLComponents()
+        url.scheme = "https"
+        url.host = "api.openweathermap.org"
+        url.path = "/data/2.5/"
+        return url
+    }()
+    
+    struct Requests {
+        static let weather = "weather"
+        static let forecast = "forecast"
+    }
+}
+
 enum AnswerServer {
     case success(Codable)
     case failure(ErrorServer)

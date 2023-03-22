@@ -21,8 +21,8 @@ class MainViewController: UIViewController {
     private let stackConditionsWeatherView = UIStackView()
     private let stackHourForestView = UIStackView()
     private let backgroundView = UIImageView()
-    private let leftBarButtonItem = UIBarButtonItem()
-    private let rightBarButtonItem = UIBarButtonItem()
+    private let leftButton = UIButton()
+    private let rightButton = UIButton()
     
     private let button = UIButton()
     
@@ -46,9 +46,18 @@ class MainViewController: UIViewController {
             .asObservable()
             .bind(to: viewModel.viewWillAppearSubject)
             .disposed(by: disposeBag)
-        button.rx.tap
+        rightButton.rx.tap
             .asObservable()
             .bind(to: viewModel.updateWeather)
+            .disposed(by: disposeBag)
+        leftButton.rx.tap
+            .asObservable()
+            .subscribe { [weak self] _ in
+                let viewModel = CitiesTableViewModel()
+                let vc = CitiesTableViewController()
+                vc.bind(to: viewModel)
+                self?.navigationController?.pushViewController(vc, animated: true)
+            }
             .disposed(by: disposeBag)
         
         viewModel.statusImageName
@@ -100,18 +109,16 @@ class MainViewController: UIViewController {
     }
     private func setupBarButtomItem() {
         let imageLeft = UIImage(systemName: "list.bullet")?.withRenderingMode(.alwaysTemplate)
-        let leftButton = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 24, height: 24)))
+        leftButton.frame = CGRect(origin: .zero, size: CGSize(width: 24, height: 24))
         leftButton.setImage(imageLeft, for: .normal)
         leftButton.tintColor = .white
-        leftBarButtonItem.customView = leftButton
-        navigationItem.leftBarButtonItem = leftBarButtonItem
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftButton)
         
         let imageRight = UIImage(systemName: "arrow.counterclockwise")?.withRenderingMode(.alwaysTemplate)
-        let rightButton = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 24, height: 24)))
+        rightButton.frame = CGRect(origin: .zero, size: CGSize(width: 24, height: 24))
         rightButton.setImage(imageRight, for: .normal)
         rightButton.tintColor = .white
-        rightBarButtonItem.customView = rightButton
-        navigationItem.rightBarButtonItem = rightBarButtonItem
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightButton)
     }
     private func setupImageWeather() {
         let image = UIImage(systemName: "questionmark")
@@ -208,5 +215,12 @@ class MainViewController: UIViewController {
         }
         
         view.sendSubviewToBack(backgroundView)
+    }
+    
+    @objc private func touchLeftButton() {
+        let viewModel = CitiesTableViewModel()
+        let vc = CitiesTableViewController()
+        vc.bind(to: viewModel)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

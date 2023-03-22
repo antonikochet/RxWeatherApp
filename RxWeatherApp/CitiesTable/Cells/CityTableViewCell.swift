@@ -7,6 +7,12 @@
 
 import UIKit
 
+struct CityCellViewModel {
+    let name: String
+    let temp: String
+    let timeUpdate: String
+}
+
 class CityTableViewCell: UITableViewCell {
 
     static let Identifier = "CityCell"
@@ -50,13 +56,16 @@ class CityTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func set(weatherCity: ViewWeather) {
-        nameCity.text = weatherCity.city
-        tempLabel.text = weatherCity.temperature.tempString
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm dd-MM-yyyy"
-        timeUpdateLabel.text = dateFormatter.string(from: weatherCity.dateUpdate)
+    func set(_ viewModel: CityCellViewModel) {
+        nameCity.text = viewModel.name
+        tempLabel.text = viewModel.temp
+        timeUpdateLabel.text = viewModel.timeUpdate
+//        nameCity.text = weatherCity.city
+//        tempLabel.text = weatherCity.temperature.tempString
+//
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "HH:mm dd-MM-yyyy"
+//        timeUpdateLabel.text = dateFormatter.string(from: weatherCity.dateUpdate)
     }
     
     override func updateConstraints() {

@@ -18,72 +18,29 @@ class ApiManager {
     
     private var lang: Lang
     private var units: Units
-    private let apiKey = "4d5555216cc6eafafdb25aeee2050261"
     private let session = URLSession(configuration: .default)
     private let dispatchGroup = DispatchGroup()
-    private var baseUrlComponents: URLComponents = {
-        var url = URLComponents()
-        url.scheme = "https"
-        url.host = "api.openweathermap.org"
-        url.path = "/data/2.5/"
-        return url
-    }()
     
     init() {
         self.lang = Lang.ru
         self.units = Units.metric
     }
     
-    func getWeather(for typeGetting: TypeGettingCurrectWeather, countTimestamps: Int, completion: @escaping GetWeather) {
-        let currectUrlComponemts = URLComponemtsCurrect(typeGetting)
-        let forecastUrlComponemts = URLComponemtsForecast(typeGetting, countTimestamps: countTimestamps)
-        var currect: Currect?
-        var forecast: Forecast?
-        var error: ErrorServer?
-        
-        dispatchGroup.enter()
-        request(forUrl: currectUrlComponemts, type: Currect.self) { answer in
-            switch answer {
-                case .success(let GettingCurrect):
-                    currect = (GettingCurrect as! Currect)
-                case .failure(let GettingError):
-                    error = GettingError
-            }
-            self.dispatchGroup.leave()
-        }
-        dispatchGroup.enter()
-        request(forUrl: forecastUrlComponemts, type: Forecast.self) { answer in
-            switch answer {
-                case .success(let GettingForecast):
-                    forecast = (GettingForecast as! Forecast)
-                case .failure(let GettingError):
-                    if error == nil {
-                        error = GettingError
-                    }
-            }
-            self.dispatchGroup.leave()
-        }
-        dispatchGroup.notify(queue: .main) {
-            completion(currect, forecast, error)
-        }
-        
-    }
-    
     private func URLComponemtsCurrect(_ typeGetting: TypeGettingCurrectWeather) -> URLComponents {
-        var urlComponemts = baseUrlComponents
-        urlComponemts.path += "weather"
+        var urlComponemts = WeatherApi.baseUrlComponents
+        urlComponemts.path += WeatherApi.Requests.weather
         urlComponemts.queryItems = typeGetting.generateURLQueryItem() + [
-                                    URLQueryItem(name: "appid", value: apiKey),
+                                    URLQueryItem(name: "appid", value: WeatherApi.apiKey),
                                     URLQueryItem(name: lang.nameHeader, value: lang.rawValue),
                                     URLQueryItem(name: units.nameHeader, value: units.rawValue)]
         return urlComponemts
     }
     
     private func URLComponemtsForecast(_ typeGetting: TypeGettingCurrectWeather, countTimestamps: Int) -> URLComponents {
-        var urlComponemts = baseUrlComponents
-        urlComponemts.path += "forecast"
+        var urlComponemts = WeatherApi.baseUrlComponents
+        urlComponemts.path += WeatherApi.Requests.forecast
         urlComponemts.queryItems = typeGetting.generateURLQueryItem() + [
-                                    URLQueryItem(name: "appid", value: apiKey),
+                                    URLQueryItem(name: "appid", value: WeatherApi.apiKey),
                                     URLQueryItem(name: lang.nameHeader, value: lang.rawValue),
                                     URLQueryItem(name: units.nameHeader, value: units.rawValue),
                                     URLQueryItem(name: "cnt", value: String(countTimestamps))]
@@ -135,6 +92,23 @@ extension ApiManager {
         request.httpMethod = HTTPMethod.GET.rawValue
         
         return session.rx.data(request: request).map(Forecast.self)
+    }
+    
+    func getCities(_ query: String) -> Observable<SuggestionsResponse> {
+        var urlComponents = DadataApi.baseUrlComponents
+        urlComponents.path += DadataApi.Requests.address
+        guard let url = urlComponents.url else { return Observable.error(ApiError.invalidURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.POST.rawValue
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("Token " + DadataApi.apiKey, forHTTPHeaderField: "Authorization")
+        
+        var requestParams = SuggestionsRequest(query: query,
+                                               upperScaleLimit: .init(value: .city),
+                                               lowerScaleLimit: .init(value: .city))
+        request.httpBody = try? requestParams.toJSON()
+        
+        return  session.rx.data(request: request).map(SuggestionsResponse.self)
     }
 }
 

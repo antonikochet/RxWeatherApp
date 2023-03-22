@@ -55,18 +55,18 @@ class WeatherProvider {
         }
         guard city != location else { return }
         
-        ApiManager.shared.getWeather(for: TypeGettingCurrectWeather.city(city), countTimestamps: 7) { [weak self] currect, forecast, error in
-            guard error == nil else {
-                self?.delegateError?.showError(error: error!)
-                return
-            }
-            if currect != nil,
-               forecast != nil {
-                let viewWeather = ViewWeather(currect!, forecast!)
-                self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: viewWeather.city)
-                self?.delegateReact?.updateView(weather: viewWeather)
-            }
-        }
+//        ApiManager.shared.getWeather(for: TypeGettingCurrectWeather.city(city), countTimestamps: 7) { [weak self] currect, forecast, error in
+//            guard error == nil else {
+//                self?.delegateError?.showError(error: error!)
+//                return
+//            }
+//            if currect != nil,
+//               forecast != nil {
+//                let viewWeather = ViewWeather(currect!, forecast!)
+//                self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: viewWeather.city)
+//                self?.delegateReact?.updateView(weather: viewWeather)
+//            }
+//        }
     }
     
     func getLocation() {
@@ -74,21 +74,21 @@ class WeatherProvider {
             let lon = location.coordinate.longitude
             let lat = location.coordinate.latitude
             let typeGetting = TypeGettingCurrectWeather.location(lat: lat, lon: lon)
-            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
-                guard let strongSelf = self else { return }
-                guard error == nil else {
-                    strongSelf.delegateError?.showError(error: ErrorServer(cod: "", message: "Погода не найдена по местоположению"))
-                    return
-                }
-                if currect != nil,
-                   forecast != nil {
-                    var viewWeather = ViewWeather(currect!, forecast!)
-                    viewWeather.city = strongSelf.location
-                    strongSelf.dictionaryOfCityWeather.updateValue(viewWeather, forKey: strongSelf.location )
-                    strongSelf.delegateReact?.updateView(weather: viewWeather)
-                    strongSelf.currectCity = strongSelf.location
-                }
-            }
+//            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
+//                guard let strongSelf = self else { return }
+//                guard error == nil else {
+//                    strongSelf.delegateError?.showError(error: ErrorServer(cod: "", message: "Погода не найдена по местоположению"))
+//                    return
+//                }
+//                if currect != nil,
+//                   forecast != nil {
+//                    var viewWeather = ViewWeather(currect!, forecast!)
+//                    viewWeather.city = strongSelf.location
+//                    strongSelf.dictionaryOfCityWeather.updateValue(viewWeather, forKey: strongSelf.location )
+//                    strongSelf.delegateReact?.updateView(weather: viewWeather)
+//                    strongSelf.currectCity = strongSelf.location
+//                }
+//            }
         }
     }
     
@@ -100,17 +100,17 @@ class WeatherProvider {
                 continue
             }
             let typeGetting = TypeGettingCurrectWeather.city(nameCity)
-            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
-                guard error == nil else {
-                    errorServer = error
-                    return
-                }
-                if currect != nil,
-                   forecast != nil {
-                    let viewWeather = ViewWeather(currect!, forecast!)
-                    self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: nameCity)
-                }
-            }
+//            ApiManager.shared.getWeather(for: typeGetting, countTimestamps: 7) { [weak self] currect, forecast, error in
+//                guard error == nil else {
+//                    errorServer = error
+//                    return
+//                }
+//                if currect != nil,
+//                   forecast != nil {
+//                    let viewWeather = ViewWeather(currect!, forecast!)
+//                    self?.dictionaryOfCityWeather.updateValue(viewWeather, forKey: nameCity)
+//                }
+//            }
         }
         guard errorServer != nil else { return }
         self.delegateError?.showError(error: errorServer!)
@@ -122,42 +122,5 @@ class WeatherProvider {
         } else {
             getWeather()
         }
-    }
-}
-
-extension WeatherProvider: TableOfCityDelegate {
-    
-    func addNewCity(name: String) {
-        currectCity = name
-        getWeather()
-    }
-    
-    func selectCity(name: String) {
-        currectCity = name
-        guard let currectWeather = dictionaryOfCityWeather[currectCity!] else { return }
-        delegateReact?.updateView(weather: currectWeather)
-    }
-    
-    func removeCity(name: String) {
-        if name != currectCity {
-            dictionaryOfCityWeather.removeValue(forKey: name)
-        } else {
-            let arrayCities = Array(dictionaryOfCityWeather.keys.filter { $0 != name })
-            if let firstCity = arrayCities.first {
-                currectCity = firstCity
-                delegateReact?.updateView(weather: dictionaryOfCityWeather[firstCity]!)
-            }
-            dictionaryOfCityWeather.removeValue(forKey: name)
-        }
-    }
-    
-    var arrayWeather: [ViewWeather] {
-        let arrayWeather = Array(dictionaryOfCityWeather.values)
-        let filterWeather = arrayWeather.filter { $0.city != location }
-        return filterWeather.sorted { $0.city < $1.city }
-    }
-    
-    var viewWeatherLocation: ViewWeather? {
-        return dictionaryOfCityWeather[location]
     }
 }
